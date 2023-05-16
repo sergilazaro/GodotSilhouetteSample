@@ -1,0 +1,29 @@
+[gd_resource type="Shader" format=2]
+
+[resource]
+code = "shader_type spatial;
+render_mode unshaded, depth_draw_never, depth_test_disable, shadows_disabled, ambient_light_disabled;
+
+uniform sampler2D silhouette_depth_tex;
+uniform vec4 silhouette_color : hint_color = vec4(0.5, 0.5, 0.5, 1.0);
+
+float RgbToFloat(vec3 rgb)
+{
+	float scale = 256.0;
+   return rgb.r + (rgb.g / scale) + (rgb.b / (scale * scale));
+}
+
+void fragment() {
+	
+	ALBEDO.rgb =  texture(SCREEN_TEXTURE, SCREEN_UV).rgb;
+	float world_depth = textureLod(DEPTH_TEXTURE, SCREEN_UV, 0.0).x;
+	
+	vec3 silhouette_depth_rgb = texture(silhouette_depth_tex, SCREEN_UV).rgb;
+	float silhouette_depth = RgbToFloat(silhouette_depth_rgb);
+	
+	if (silhouette_depth > world_depth && silhouette_depth != 0.0 && silhouette_depth != 1.0)
+	{
+		// alpha blending	
+		ALBEDO.rgb = ALBEDO.rgb * (1.0 - silhouette_color.a) + silhouette_color.rgb * silhouette_color.a;
+	}
+}"

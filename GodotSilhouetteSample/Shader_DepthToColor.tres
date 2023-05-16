@@ -1,0 +1,24 @@
+[gd_resource type="Shader" format=2]
+
+[resource]
+code = "shader_type spatial;
+render_mode unshaded, depth_draw_never, depth_test_disable, shadows_disabled, ambient_light_disabled;
+
+vec3 FloatToRgb(float v) {
+	float scale = 256.0;
+	
+	float r = v;
+	
+	float g = mod(v * scale, 1.0);
+	r -= g/scale;
+	
+	float b = mod(v * scale * scale, 1.0);
+	g -= b/scale;
+	
+	return vec3(r, g, b);
+}
+
+void fragment() {
+	float depth = texture(DEPTH_TEXTURE, SCREEN_UV).x;
+	ALBEDO.rgb = FloatToRgb(depth);
+}"
